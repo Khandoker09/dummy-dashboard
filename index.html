@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dummy Row–Column Mixed Model Dashboard</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+    body {
+        margin: 0;
+        font-family: Arial, Helvetica, sans-serif;
+        background: #f6f8fb;
+        color: #172033;
+    }
+    .header {
+        padding: 26px 38px;
+        background: linear-gradient(90deg, #143a54, #23736f);
+        color: white;
+    }
+    .header h1 {
+        margin: 0 0 8px 0;
+        font-size: 30px;
+    }
+    .header p {
+        margin: 0;
+        font-size: 16px;
+        opacity: 0.95;
+    }
+    .container {
+        padding: 24px 38px 40px 38px;
+    }
+    .cards {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(160px, 1fr));
+        gap: 14px;
+        margin-bottom: 18px;
+    }
+    .card {
+        background: white;
+        border-radius: 12px;
+        padding: 16px;
+        box-shadow: 0 2px 10px rgba(20, 58, 84, 0.10);
+        border: 1px solid #e5ebf2;
+    }
+    .card .label {
+        color: #5f6b7a;
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+    .card .value {
+        font-weight: 700;
+        font-size: 22px;
+    }
+    .panel {
+        background: white;
+        border-radius: 14px;
+        padding: 18px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(20, 58, 84, 0.10);
+        border: 1px solid #e5ebf2;
+    }
+    .two-col {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 20px;
+    }
+    .btn-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 14px;
+    }
+    button {
+        border: none;
+        border-radius: 999px;
+        padding: 10px 16px;
+        cursor: pointer;
+        background: #e8eef6;
+        color: #143a54;
+        font-weight: 700;
+        transition: 0.2s;
+    }
+    button.active, button:hover {
+        background: #143a54;
+        color: white;
+    }
+    .decision {
+        border-left: 6px solid #23736f;
+        background: #edf7f5;
+        padding: 14px 16px;
+        border-radius: 10px;
+        font-size: 16px;
+        line-height: 1.45;
+    }
+    .warn {
+        border-left: 6px solid #ee9b00;
+        background: #fff6e6;
+        padding: 13px 16px;
+        border-radius: 10px;
+        font-size: 15px;
+        line-height: 1.45;
+        margin-top: 12px;
+    }
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+    }
+    th, td {
+        padding: 10px 12px;
+        border-bottom: 1px solid #e5ebf2;
+        text-align: left;
+    }
+    th {
+        background: #f0f4f8;
+        color: #143a54;
+    }
+    .badge {
+        display: inline-block;
+        min-width: 44px;
+        text-align: center;
+        border-radius: 7px;
+        padding: 5px 8px;
+        color: white;
+        font-weight: 700;
+    }
+    .P1 { background: #48a141; }
+    .P2 { background: #f28e1c; }
+    .P3 { background: #1f78d1; }
+    .choose {
+        color: #23736f;
+        font-weight: 800;
+    }
+    .small {
+        font-size: 13px;
+        color: #687586;
+    }
+    .grid-design {
+        display: grid;
+        grid-template-columns: 100px repeat(3, 1fr);
+        gap: 7px;
+        align-items: center;
+    }
+    .grid-cell {
+        background: #f0f4f8;
+        border-radius: 9px;
+        padding: 12px;
+        text-align: center;
+        font-weight: 700;
+    }
+    .grid-head {
+        background: #143a54;
+        color: white;
+    }
+    .trt-cell {
+        color: white;
+        font-size: 18px;
+    }
+    @media (max-width: 950px) {
+        .two-col, .cards { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+<div class="header">
+    <h1>Dummy dashboard: row–column design and model choice</h1>
+    <p>Illustration only — fake leaf-area data for 15 plants, 3 P treatments, 5 days, and 3 time slots.</p>
+</div>
+
+<div class="container">
+    <div class="cards">
+        <div class="card"><div class="label">Plants</div><div class="value">15</div></div>
+        <div class="card"><div class="label">P treatments</div><div class="value">3</div></div>
+        <div class="card"><div class="label">Rows</div><div class="value">5 days</div></div>
+        <div class="card"><div class="label">Columns</div><div class="value">3 slots</div></div>
+    </div>
+
+    <div class="panel">
+        <h2>1. Row–column scan layout</h2>
+        <div class="grid-design" id="layoutGrid"></div>
+        <p class="small">P1 = Low P, P2 = Medium P, P3 = High P. Each day contains all 3 P treatments once.</p>
+    </div>
+
+    <div class="two-col">
+        <div class="panel">
+            <h2>2. Interactive dummy graph</h2>
+            <div class="btn-row">
+                <button id="btnRaw" class="active" onclick="setGraph('raw')">Show plant data</button>
+                <button id="btnMeans" onclick="setGraph('means')">Show treatment means</button>
+                <button id="btnDay" onclick="setGraph('day')">Show day effect</button>
+            </div>
+            <div id="chart" style="height: 430px;"></div>
+        </div>
+
+        <div class="panel">
+            <h2>3. Model choice output</h2>
+            <table id="modelTable">
+                <thead>
+                    <tr>
+                        <th>Model</th>
+                        <th>Block effects</th>
+                        <th>P effect</th>
+                        <th>SED</th>
+                        <th>Decision</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div class="decision" style="margin-top: 14px;">
+                <b>Decision rule:</b> fit both models with Kenward–Roger correction and choose the model with the smaller SED for P-treatment comparisons.
+            </div>
+            <div class="warn">
+                <b>In this dummy example:</b> Model B is selected because SED = 2.2 is smaller than SED = 2.8.
+            </div>
+        </div>
+    </div>
+
+    <div class="panel">
+        <h2>4. Dummy data table</h2>
+        <div class="btn-row">
+            <button onclick="highlightTreatment('all')" class="active" id="filterAll">All</button>
+            <button onclick="highlightTreatment('P1')" id="filterP1">P1 Low P</button>
+            <button onclick="highlightTreatment('P2')" id="filterP2">P2 Medium P</button>
+            <button onclick="highlightTreatment('P3')" id="filterP3">P3 High P</button>
+        </div>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Plant</th><th>Day</th><th>Slot</th><th>Time</th><th>Treatment</th><th>Leaf area</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+const data = [{"PlantID": "Plant 1", "Day": "Day 1", "Slot": "Slot 1", "Time": "Morning", "Treatment": "P1", "Meaning": "Low P", "Leaf area": 19.4}, {"PlantID": "Plant 2", "Day": "Day 1", "Slot": "Slot 2", "Time": "Midday", "Treatment": "P2", "Meaning": "Medium P", "Leaf area": 22.4}, {"PlantID": "Plant 3", "Day": "Day 1", "Slot": "Slot 3", "Time": "Afternoon", "Treatment": "P3", "Meaning": "High P", "Leaf area": 29.4}, {"PlantID": "Plant 4", "Day": "Day 2", "Slot": "Slot 1", "Time": "Morning", "Treatment": "P2", "Meaning": "Medium P", "Leaf area": 25.1}, {"PlantID": "Plant 5", "Day": "Day 2", "Slot": "Slot 2", "Time": "Midday", "Treatment": "P3", "Meaning": "High P", "Leaf area": 27.5}, {"PlantID": "Plant 6", "Day": "Day 2", "Slot": "Slot 3", "Time": "Afternoon", "Treatment": "P1", "Meaning": "Low P", "Leaf area": 19.4}, {"PlantID": "Plant 7", "Day": "Day 3", "Slot": "Slot 1", "Time": "Morning", "Treatment": "P3", "Meaning": "High P", "Leaf area": 28.9}, {"PlantID": "Plant 8", "Day": "Day 3", "Slot": "Slot 2", "Time": "Midday", "Treatment": "P1", "Meaning": "Low P", "Leaf area": 19.8}, {"PlantID": "Plant 9", "Day": "Day 3", "Slot": "Slot 3", "Time": "Afternoon", "Treatment": "P2", "Meaning": "Medium P", "Leaf area": 24.3}, {"PlantID": "Plant 10", "Day": "Day 4", "Slot": "Slot 1", "Time": "Morning", "Treatment": "P1", "Meaning": "Low P", "Leaf area": 19.7}, {"PlantID": "Plant 11", "Day": "Day 4", "Slot": "Slot 2", "Time": "Midday", "Treatment": "P2", "Meaning": "Medium P", "Leaf area": 25.8}, {"PlantID": "Plant 12", "Day": "Day 4", "Slot": "Slot 3", "Time": "Afternoon", "Treatment": "P3", "Meaning": "High P", "Leaf area": 30.9}, {"PlantID": "Plant 13", "Day": "Day 5", "Slot": "Slot 1", "Time": "Morning", "Treatment": "P2", "Meaning": "Medium P", "Leaf area": 23.6}, {"PlantID": "Plant 14", "Day": "Day 5", "Slot": "Slot 2", "Time": "Midday", "Treatment": "P3", "Meaning": "High P", "Leaf area": 29.9}, {"PlantID": "Plant 15", "Day": "Day 5", "Slot": "Slot 3", "Time": "Afternoon", "Treatment": "P1", "Meaning": "Low P", "Leaf area": 20.5}];
+const models = [{"Model": "Model A", "Block effects": "Day + slot random", "P effect": "p = 0.012", "SED": 2.8, "Decision": ""}, {"Model": "Model B", "Block effects": "Day + slot fixed", "P effect": "p = 0.010", "SED": 2.2, "Decision": "Choose"}];
+const layout = {"1": ["P1", "P2", "P3"], "2": ["P2", "P3", "P1"], "3": ["P3", "P1", "P2"], "4": ["P1", "P2", "P3"], "5": ["P2", "P3", "P1"]};
+
+const colors = {
+    "P1": "#48a141",
+    "P2": "#f28e1c",
+    "P3": "#1f78d1"
+};
+
+function treatmentBadge(t) {
+    return `<span class="badge ${t}">${t}</span>`;
+}
+
+function makeLayoutGrid() {
+    const grid = document.getElementById("layoutGrid");
+    grid.innerHTML = "";
+    const heads = ["Day", "Slot 1", "Slot 2", "Slot 3"];
+    heads.forEach(h => {
+        const cell = document.createElement("div");
+        cell.className = "grid-cell grid-head";
+        cell.textContent = h;
+        grid.appendChild(cell);
+    });
+    Object.keys(layout).forEach(day => {
+        let dayCell = document.createElement("div");
+        dayCell.className = "grid-cell";
+        dayCell.textContent = "Day " + day;
+        grid.appendChild(dayCell);
+        layout[day].forEach(t => {
+            let cell = document.createElement("div");
+            cell.className = "grid-cell trt-cell " + t;
+            cell.textContent = t;
+            grid.appendChild(cell);
+        });
+    });
+}
+
+function fillModelTable() {
+    const tbody = document.querySelector("#modelTable tbody");
+    tbody.innerHTML = "";
+    models.forEach(m => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td><b>${m.Model}</b></td>
+            <td>${m["Block effects"]}</td>
+            <td>${m["P effect"]}</td>
+            <td><b>${m.SED}</b></td>
+            <td class="${m.Decision ? 'choose' : ''}">${m.Decision ? '✅ ' + m.Decision : ''}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function fillDataTable(filter='all') {
+    const tbody = document.querySelector("#dataTable tbody");
+    tbody.innerHTML = "";
+    data.forEach(row => {
+        if (filter !== 'all' && row.Treatment !== filter) return;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${row.PlantID}</td>
+            <td>${row.Day}</td>
+            <td>${row.Slot}</td>
+            <td>${row.Time}</td>
+            <td>${treatmentBadge(row.Treatment)} ${row.Meaning}</td>
+            <td>${row["Leaf area"]}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+function setButtonActive(prefix, chosen) {
+    ["Raw","Means","Day"].forEach(x => {
+        document.getElementById("btn"+x).classList.remove("active");
+    });
+    if (chosen === "raw") document.getElementById("btnRaw").classList.add("active");
+    if (chosen === "means") document.getElementById("btnMeans").classList.add("active");
+    if (chosen === "day") document.getElementById("btnDay").classList.add("active");
+}
+
+function setGraph(type) {
+    setButtonActive("", type);
+    if (type === "raw") rawGraph();
+    if (type === "means") meansGraph();
+    if (type === "day") dayGraph();
+}
+
+function rawGraph() {
+    let traces = ["P1","P2","P3"].map(t => {
+        let d = data.filter(r => r.Treatment === t);
+        return {
+            x: d.map(r => r.Treatment),
+            y: d.map(r => r["Leaf area"]),
+            text: d.map(r => `${r.PlantID}<br>${r.Day}, ${r.Time}`),
+            mode: "markers",
+            type: "scatter",
+            name: t,
+            marker: {size: 13, color: colors[t], line: {color: "#172033", width: 1}},
+            hovertemplate: "%{text}<br>Treatment=%{x}<br>Leaf area=%{y}<extra></extra>"
+        };
+    });
+    Plotly.newPlot("chart", traces, {
+        title: "Dummy leaf area by P treatment",
+        yaxis: {title: "Leaf area"},
+        xaxis: {title: "P treatment"},
+        margin: {t: 55, r: 20, l: 55, b: 55},
+        legend: {orientation: "h", y: -0.22},
+        plot_bgcolor: "white",
+        paper_bgcolor: "white"
+    }, {responsive: true});
+}
+
+function meansGraph() {
+    let treatments = ["P1","P2","P3"];
+    let means = treatments.map(t => {
+        let vals = data.filter(r => r.Treatment === t).map(r => r["Leaf area"]);
+        return vals.reduce((a,b)=>a+b,0)/vals.length;
+    });
+    Plotly.newPlot("chart", [{
+        x: treatments,
+        y: means,
+        type: "bar",
+        marker: {color: treatments.map(t => colors[t])},
+        text: means.map(v => v.toFixed(1)),
+        textposition: "outside",
+        hovertemplate: "Treatment=%{x}<br>Mean leaf area=%{y:.1f}<extra></extra>"
+    }], {
+        title: "Estimated treatment means from dummy data",
+        yaxis: {title: "Mean leaf area"},
+        xaxis: {title: "P treatment"},
+        margin: {t: 55, r: 20, l: 55, b: 55},
+        plot_bgcolor: "white",
+        paper_bgcolor: "white"
+    }, {responsive: true});
+}
+
+function dayGraph() {
+    let dayNames = ["Day 1","Day 2","Day 3","Day 4","Day 5"];
+    let means = dayNames.map(day => {
+        let vals = data.filter(r => r.Day === day).map(r => r["Leaf area"]);
+        return vals.reduce((a,b)=>a+b,0)/vals.length;
+    });
+    Plotly.newPlot("chart", [{
+        x: dayNames,
+        y: means,
+        type: "scatter",
+        mode: "lines+markers",
+        marker: {size: 12},
+        line: {width: 3},
+        hovertemplate: "%{x}<br>Mean leaf area=%{y:.1f}<extra></extra>"
+    }], {
+        title: "Dummy day-to-day scan variation",
+        yaxis: {title: "Mean leaf area"},
+        xaxis: {title: "Scan day"},
+        margin: {t: 55, r: 20, l: 55, b: 55},
+        plot_bgcolor: "white",
+        paper_bgcolor: "white"
+    }, {responsive: true});
+}
+
+function highlightTreatment(filter) {
+    ["All","P1","P2","P3"].forEach(x => {
+        document.getElementById("filter"+x).classList.remove("active");
+    });
+    document.getElementById("filter"+(filter === 'all' ? 'All' : filter)).classList.add("active");
+    fillDataTable(filter);
+}
+
+makeLayoutGrid();
+fillModelTable();
+fillDataTable();
+rawGraph();
+</script>
+</body>
+</html>
